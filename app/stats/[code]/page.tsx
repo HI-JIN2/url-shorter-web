@@ -1,37 +1,15 @@
-"use client";
-
-import { useEffect, useState } from "react";
-
-export default function StatsPage({ params }: { params: { code: string } }) {
+export default async function StatsPage({ params }: { params: { code: string } }) {
   const { code } = params;
-  const [data, setData] = useState<any>(null);
-  const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    const loadStats = async () => {
-      try {
-        const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/stats/${code}`);
-        if (!res.ok) throw new Error("Not found");
-        const json = await res.json();
-        setData(json);
-      } catch (err) {
-        console.error(err);
-      } finally {
-        setLoading(false);
-      }
-    };
+  const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/stats/${code}`, {
+    cache: "no-cache"
+  });
 
-    loadStats();
-  }, [code]);
+  if (!res.ok) {
+    return <div className="p-6 text-red-500">Stats not found for {code}</div>;
+  }
 
-  if (loading) return <div className="p-6">Loading...</div>;
-
-  if (!data)
-    return (
-      <div className="p-6 text-red-500">
-        Stats not found for code: <b>{code}</b>
-      </div>
-    );
+  const data = await res.json();
 
   return (
     <div className="max-w-xl mx-auto p-6 mt-10 bg-white shadow-lg rounded-xl">
@@ -45,11 +23,7 @@ export default function StatsPage({ params }: { params: { code: string } }) {
 
         <div>
           <div className="text-gray-500 text-sm">Original URL</div>
-          <a
-            href={data.original_url}
-            target="_blank"
-            className="text-blue-600 underline break-all"
-          >
+          <a href={data.original_url} target="_blank" className="text-blue-600 underline break-all">
             {data.original_url}
           </a>
         </div>
