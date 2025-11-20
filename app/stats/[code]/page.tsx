@@ -1,12 +1,16 @@
-export default async function StatsPage({ params }: { params: { code: string } }) {
-  const { code } = params;
+export default async function StatsPage({ params }: { params: Promise<{ code: string }> }) {
+  const { code } = await params;
 
   const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/stats/${code}`, {
-    cache: "no-cache"
+    cache: "no-store",
   });
 
   if (!res.ok) {
-    return <div className="p-6 text-red-500">Stats not found for {code}</div>;
+    return (
+      <div className="p-6 text-red-500">
+        Stats not found for code: <b>{code}</b>
+      </div>
+    );
   }
 
   const data = await res.json();
@@ -23,7 +27,11 @@ export default async function StatsPage({ params }: { params: { code: string } }
 
         <div>
           <div className="text-gray-500 text-sm">Original URL</div>
-          <a href={data.original_url} target="_blank" className="text-blue-600 underline break-all">
+          <a
+            href={data.original_url}
+            target="_blank"
+            className="text-blue-600 underline break-all"
+          >
             {data.original_url}
           </a>
         </div>
